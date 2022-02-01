@@ -44,6 +44,7 @@ class VisualTransformer(nn.Module):
         x = x + self.positional_embedding.to(x.dtype)
         x = self.ln_pre(x)
 
+        # no need to transpose: LeanTransformer already accepts NLD
         x = self.transformer(x).last_hidden_state
 
         x = self.ln_post(x[:, 0, :])
@@ -118,6 +119,8 @@ class CLIP(nn.Module):
         x = self.token_embedding(text).type(self.dtype)  # [batch_size, n_ctx, d_model]
 
         x = x + self.positional_embedding.type(self.dtype)
+
+        # no need to transpose: LeanTransformer already accepts NLD
         x = self.transformer(x).last_hidden_state
 
         # x.shape = [batch_size, n_ctx, transformer.width]
