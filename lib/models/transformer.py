@@ -112,14 +112,14 @@ class LeanTransformerConfig(PretrainedConfig):
 
     def get_linear_layer(self, key: str, in_features: int, out_features: int, bias: bool):
         assert self.adapter_dim == 0 or self.share_large_matrices, "not sharing matrices => adapter_dim should be 0"
+        if not self.share_large_matrices and self.block_size == 0:
+            return nn.Linear(in_features, out_features, bias)
 
-        if self.share_large_matrices:
+        elif self.share_large_matrices:
             shared_matrix = self.get_shared_matrix(key)
             assert tuple(shared_matrix.shape) == (out_features, in_features)
             return SemiSharedLinear(shared_matrix, self.adapter_dim, bias)
 
-        elif not self.share_large_matrices and self.block_size == 0:
-            return nn.Linear(in_features, out_features, bias)
         else:
             assert not self.share_large_matrices and self.block_size > 0 and self.adapter_dim == 0
             shared_matrix = SharedMatrix(in_features, out_features, self.block_size, self.lowrank_dim)
