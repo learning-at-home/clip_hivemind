@@ -233,7 +233,7 @@ class SimpleCLIP(CLIP):
                  transformer_heads: int,
                  transformer_layers: int,
                  gradient_checkpointing: bool = False,
-                 reversible: bool = True,  # enabled manually, not present in config
+                 reversible: bool = False,  # enabled manually, not present in config
                  ):
         vision_config = LeanTransformerConfig(
             hidden_size=vision_width, intermediate_size=vision_width * 4,

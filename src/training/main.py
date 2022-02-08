@@ -80,10 +80,10 @@ def main_worker(gpu, ngpus_per_node, log_queue, args):
         if args.gradient_checkpointing:
             model_info['gradient_checkpointing'] = True
         
-        from clip.model import CLIP
-        model = CLIP(**model_info)
-        #from clip.lean_model import SimpleCLIP
-        #model = SimpleCLIP(**model_info)
+        #from clip.model import CLIP
+        #model = CLIP(**model_info)
+        from clip.lean_model import SimpleCLIP
+        model = SimpleCLIP(**model_info)
         
         #convert_weights(model)
         preprocess_train = _transform(model.visual.input_resolution, is_train=True)
