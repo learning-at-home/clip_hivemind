@@ -17,7 +17,6 @@ from torch.utils.tensorboard import SummaryWriter
 from torch.cuda.amp import GradScaler
 
 from clip.clip import _transform, load
-from clip.model import convert_weights, CLIP
 from training.train import train, evaluate
 from training.data import get_data
 from training.params import parse_args
@@ -29,7 +28,7 @@ from training.scheduler import cosine_lr
 def convert_models_to_fp32(model):
     for p in model.parameters():
         p.data = p.data.float()
-        if p.grad:
+        if p.grad is not None:
             p.grad.data = p.grad.data.float()
 
 def is_master(args):
@@ -38,6 +37,7 @@ def is_master(args):
 def main_worker(gpu, ngpus_per_node, log_queue, args):
     args.gpu = gpu
     args.rank = gpu if args.rank is None else args.rank
+    
     setup_worker_logging(args.rank, log_queue, args.log_level)
 
     # Log and save params.
@@ -79,8 +79,13 @@ def main_worker(gpu, ngpus_per_node, log_queue, args):
             model_info = json.load(f)
         if args.gradient_checkpointing:
             model_info['gradient_checkpointing'] = True
+        
+        from clip.model import CLIP
         model = CLIP(**model_info)
-        convert_weights(model)
+        #from clip.lean_model import SimpleCLIP
+        #model = SimpleCLIP(**model_info)
+        
+        #convert_weights(model)
         preprocess_train = _transform(model.visual.input_resolution, is_train=True)
         preprocess_val = _transform(model.visual.input_resolution, is_train=False)
 
@@ -207,6 +212,7 @@ def main_worker(gpu, ngpus_per_node, log_queue, args):
         wandb.init(
             project="open-clip",
             notes=args.wandb_notes,
+            entity="justheuristic",
             tags=[],
             config=vars(args),
         )
