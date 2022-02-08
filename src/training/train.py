@@ -122,7 +122,6 @@ def train(model, data, epoch, optimizer, scaler, scheduler, args, tb_writer=None
     end = time.time()
     for i, batch in enumerate(dataloader):
         step = num_batches_per_epoch * epoch + i
-        print(step)
         scheduler(step)
 
         optimizer.zero_grad()
